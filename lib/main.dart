@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:partners_dolinalpa/pages/history.dart';
 import 'package:partners_dolinalpa/pages/home_screen.dart';
 import 'package:partners_dolinalpa/pages/login.dart';
 import 'package:partners_dolinalpa/pages/users.dart';
@@ -61,6 +62,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/partners': (context) => const UserScreen(),
+        '/history': (context) => const PaymentsScreen(),
       },
     );
   }
