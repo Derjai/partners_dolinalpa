@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:partners_dolinalpa/pages/home_screen.dart';
 import 'package:partners_dolinalpa/pages/login.dart';
+import 'package:partners_dolinalpa/pages/users.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -26,6 +27,9 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         hintColor: Colors.blueAccent,
         scaffoldBackgroundColor: Colors.white,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.blue,
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -39,6 +43,9 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         hintColor: Colors.blueAccent,
         scaffoldBackgroundColor: Colors.black,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.blueGrey,
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -53,6 +60,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
+        '/partners': (context) => const UserScreen(),
       },
     );
   }
