@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+class PaymentsScreen extends StatefulWidget {
+  const PaymentsScreen({super.key});
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<PaymentsScreen> createState() => _PaymentsScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _PaymentsScreenState extends State<PaymentsScreen> {
   final List<Map<String, dynamic>> payments = [
     {
-      'nombre': 'Martha Morales',
       'fecha': '24 de junio 2024',
       'mensualidad': 'Mayo',
       'monto': '100000',
     },
     {
-      'nombre': 'Martha Morales',
       'fecha': '24 de mayo 2024',
       'mensualidad': 'Abril',
       'monto': '100000',
     },
     {
-      'nombre': 'Martha Morales',
       'fecha': '24 de mayo 2024',
       'mensualidad': 'Marzo',
       'monto': '300000',
@@ -36,9 +33,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Lista de pagos',
+              'Martha Morales',
               style: Theme.of(context).textTheme.displayMedium,
             ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Text('Historial de pagos'),
           ),
           Expanded(
             child: ListView.builder(
@@ -48,13 +49,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       shadowColor: Colors.black,
                       elevation: 8,
                       child: ListTile(
-                        title: Text(payments[index]['nombre']),
+                        title: Text(payments[index]['fecha']),
                         subtitle: Text(
-                            '${payments[index]['fecha']}\n${payments[index]['mensualidad']} - COP \$${payments[index]['monto']}'),
-                        isThreeLine: true,
+                            '${payments[index]['mensualidad']} - COP \$${payments[index]['monto']}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            IconButton(
+                              icon: const Icon(Icons.calendar_month),
+                              onPressed: () {
+                                // TODO: Implementar la funcionalidad de ver detalle
+                              },
+                            ),
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {
