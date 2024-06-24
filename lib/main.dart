@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:partners_dolinalpa/pages/calendar.dart';
 import 'package:partners_dolinalpa/pages/history.dart';
 import 'package:partners_dolinalpa/pages/user_history.dart';
 import 'package:partners_dolinalpa/pages/home_screen.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
         '/partners': (context) => const UserScreen(),
         '/payments': (context) => const PaymentsScreen(),
         '/history': (context) => const HistoryScreen(),
+        '/calendar': (context) => const CalendarScreen(),
       },
     );
   }
