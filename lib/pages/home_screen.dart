@@ -50,6 +50,40 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: const Text('Resumen'),
         ),
+        drawer: Drawer(
+            child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Inicio'),
+              onTap: () {
+                Navigator.pushNamed(context, '/');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Calendario'),
+              onTap: () {
+                Navigator.pushNamed(context, '/calendar');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Socios'),
+              onTap: () {
+                Navigator.pushNamed(context, '/partners');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.attach_money),
+              title: const Text('Pagos'),
+              onTap: () {
+                Navigator.pushNamed(context, '/payments');
+              },
+            ),
+          ],
+        )),
         body: SingleChildScrollView(
           child: Column(
             children: [
