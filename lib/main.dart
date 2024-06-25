@@ -7,7 +7,7 @@ import 'package:partners_dolinalpa/pages/user_history.dart';
 import 'package:partners_dolinalpa/pages/home_screen.dart';
 import 'package:partners_dolinalpa/pages/login.dart';
 import 'package:partners_dolinalpa/pages/users.dart';
-import 'firebase_options.dart';
+import 'firebase/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
