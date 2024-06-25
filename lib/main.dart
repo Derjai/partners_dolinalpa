@@ -1,6 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
+import 'package:partners_dolinalpa/controller/partner_controller.dart';
+import 'package:partners_dolinalpa/data/partners_datasource.dart';
+import 'package:partners_dolinalpa/domain/repositories/i_partner_repository.dart';
+import 'package:partners_dolinalpa/domain/use_case/partner_use_case.dart';
 import 'package:partners_dolinalpa/pages/calendar.dart';
 import 'package:partners_dolinalpa/pages/history.dart';
 import 'package:partners_dolinalpa/pages/user_history.dart';
@@ -15,6 +20,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put<IPartnerRepository>(FirestorePartnersRepository());
+  Get.put(PartnerUseCase(Get.find<IPartnerRepository>()));
+  Get.put(PartnerController());
   runApp(const MyApp());
 }
 

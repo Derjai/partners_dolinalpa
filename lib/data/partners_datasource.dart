@@ -57,7 +57,7 @@ class FirestorePartnersRepository implements IPartnerRepository {
   @override
   Future<void> addPartner(Partner partner) async {
     try {
-      await _partnersCollection.add(partner.toJson());
+      await _partnersCollection.doc(partner.id).set(partner.toJson());
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw Exception('No tienes permisos para acceder a los datos');
