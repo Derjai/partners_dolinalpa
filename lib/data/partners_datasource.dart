@@ -14,9 +14,6 @@ class FirestorePartnersRepository implements IPartnerRepository {
           .map((doc) => Partner.fromJson(doc.data() as Map<String, dynamic>)
               .copyWith(id: doc.id))
           .toList();
-      if (partnersList.isEmpty) {
-        throw Exception('No hay socios registrados');
-      }
       return partnersList;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
@@ -27,20 +24,16 @@ class FirestorePartnersRepository implements IPartnerRepository {
       }
       throw Exception('Error al obtener socios: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return [];
     }
   }
 
   @override
-  Future<Partner> getPartner(String id) async {
+  Future<Partner?> getPartner(String id) async {
     try {
       final docSnapshot = await _partnersCollection.doc(id).get();
-      if (docSnapshot.exists) {
-        return Partner.fromJson(docSnapshot.data() as Map<String, dynamic>)
-            .copyWith(id: docSnapshot.id);
-      } else {
-        throw Exception('Usuario no encontrado');
-      }
+      return Partner.fromJson(docSnapshot.data() as Map<String, dynamic>)
+          .copyWith(id: docSnapshot.id);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw Exception('No tienes permisos para acceder a los datos');
@@ -50,7 +43,7 @@ class FirestorePartnersRepository implements IPartnerRepository {
       }
       throw Exception('Error al obtener socio: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return null;
     }
   }
 

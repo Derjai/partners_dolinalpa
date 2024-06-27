@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:partners_dolinalpa/controller/partner_controller.dart';
+import 'package:partners_dolinalpa/controller/payment_controller.dart';
+import 'package:partners_dolinalpa/domain/model/partners.dart';
+import 'package:partners_dolinalpa/domain/model/payments.dart';
+import 'package:intl/intl.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -7,26 +13,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final List<Map<String, dynamic>> payments = [
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de junio 2024',
-      'mensualidad': 'Mayo',
-      'monto': '100000',
-    },
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de mayo 2024',
-      'mensualidad': 'Abril',
-      'monto': '100000',
-    },
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de mayo 2024',
-      'mensualidad': 'Marzo',
-      'monto': '300000',
-    },
-  ];
+  final PaymentController _paymentController = Get.find<PaymentController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,46 +28,389 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: Theme.of(context).textTheme.displayMedium,
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-                itemCount: payments.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                      shadowColor: Colors.black,
-                      elevation: 8,
-                      child: ListTile(
-                        title: Text(payments[index]['nombre']),
-                        subtitle: Text(
-                            '${payments[index]['fecha']}\n${payments[index]['mensualidad']} - COP \$${payments[index]['monto']}'),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                // TODO: Implementar la funcionalidad de editar
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                // TODO: Implementar la funcionalidad de borrar
-                              },
-                            ),
-                          ],
-                        ),
-                      ));
-                }),
-          )
+          Obx(() {
+            if (_paymentController.payments.isEmpty) {
+              return const Center(
+                child: Text('No hay pagos registrados'),
+              );
+            }
+            return Expanded(
+              child: ListView.builder(
+                  itemCount: _paymentController.payments.length,
+                  itemBuilder: (context, index) {
+                    var payment = _paymentController.payments[index];
+                    return Card(
+                        shadowColor: Colors.black,
+                        elevation: 8,
+                        child: ListTile(
+                          title: FutureBuilder<String>(
+                              future: getPartnerName(payment.partnerId),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(snapshot.data!);
+                                } else {
+                                  return const Text('Cargando...');
+                                }
+                              }),
+                          subtitle: Text(
+                              '${DateFormat('dd/MM/yyyy').format(payment.paymentDate)}\n${monthToString(payment.subscription)} - COP \$${payment.paymentAmount}'),
+                          isThreeLine: true,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        String partnerId = payment.partnerId;
+                                        String month =
+                                            monthToString(payment.subscription);
+                                        double paymentAmount =
+                                            payment.paymentAmount;
+                                        DateTime paymentDate =
+                                            payment.paymentDate;
+                                        return AlertDialog(
+                                            title: const Text('Editar Pago'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    partnerId = value;
+                                                  },
+                                                  decoration: const InputDecoration(
+                                                      hintText:
+                                                          'Documento del socio'),
+                                                ),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    month = value;
+                                                  },
+                                                  decoration:
+                                                      const InputDecoration(
+                                                          hintText: 'Mes'),
+                                                ),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    paymentAmount =
+                                                        double.parse(value);
+                                                  },
+                                                  decoration:
+                                                      const InputDecoration(
+                                                          hintText: 'Monto'),
+                                                ),
+                                                TextField(
+                                                    decoration:
+                                                        const InputDecoration(
+                                                            hintText:
+                                                                'Fecha de pago'),
+                                                    readOnly: true,
+                                                    onTap: () async {
+                                                      final DateTime?
+                                                          pickedDate =
+                                                          await showDatePicker(
+                                                              context: context,
+                                                              initialDate:
+                                                                  DateTime
+                                                                      .now(),
+                                                              firstDate:
+                                                                  DateTime(
+                                                                      2024),
+                                                              lastDate:
+                                                                  DateTime(
+                                                                      2030));
+                                                      if (pickedDate != null) {
+                                                        paymentDate =
+                                                            pickedDate;
+                                                      }
+                                                    })
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Cancelar'),
+                                              ),
+                                              TextButton(
+                                                  onPressed: () async {
+                                                    final scaffoldMessenger =
+                                                        ScaffoldMessenger.of(
+                                                            context);
+                                                    if (await paymentExists(
+                                                        partnerId, month)) {
+                                                      const snackBar = SnackBar(
+                                                          content: Text(
+                                                              'El mes ingresado ya fue pago'));
+                                                      scaffoldMessenger
+                                                          .showSnackBar(
+                                                              snackBar);
+                                                      if (!context.mounted) {
+                                                        return;
+                                                      }
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    } else {
+                                                      Payment newPayment =
+                                                          Payment(
+                                                              partnerId:
+                                                                  partnerId,
+                                                              paymentDate:
+                                                                  paymentDate,
+                                                              subscription:
+                                                                  getMonth(
+                                                                      month),
+                                                              paymentAmount:
+                                                                  paymentAmount,
+                                                              paymentId: payment
+                                                                  .paymentId);
+                                                      await _paymentController
+                                                          .updatePayment(
+                                                              newPayment);
+                                                      if (!context.mounted) {
+                                                        return;
+                                                      }
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    }
+                                                  },
+                                                  child: const Text('Guardar'))
+                                            ]);
+                                      });
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () async {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Eliminar pago'),
+                                          content: const Text(
+                                              '¿Está seguro de eliminar este pago?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () async {
+                                                await _paymentController
+                                                    .deletePayment(
+                                                        payment.paymentId);
+                                                if (!context.mounted) return;
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Eliminar'),
+                                            ),
+                                          ],
+                                        );
+                                      });
+                                },
+                              ),
+                            ],
+                          ),
+                        ));
+                  }),
+            );
+          })
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implementar la funcionalidad de agregar
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                String partnerId = '';
+                String monthsInput = '';
+                DateTime paymentDate = DateTime.now();
+                double paymentAmount = 0.0;
+                String paymentId = '';
+                return AlertDialog(
+                    title: const Text('Agregar Pago'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          onChanged: (value) {
+                            partnerId = value;
+                          },
+                          decoration: const InputDecoration(
+                              hintText: 'Documento del socio'),
+                        ),
+                        TextField(
+                          onChanged: (value) {
+                            monthsInput = value;
+                          },
+                          decoration: const InputDecoration(
+                              hintText:
+                                  'Mensualidad (separar por coma para ingresar varias)'),
+                        ),
+                        TextField(
+                          onChanged: (value) {
+                            paymentAmount = double.parse(value);
+                          },
+                          decoration: const InputDecoration(hintText: 'Monto'),
+                        ),
+                        TextField(
+                            decoration: const InputDecoration(
+                                hintText: 'Fecha de pago'),
+                            readOnly: true,
+                            onTap: () async {
+                              final DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime(2030));
+                              if (pickedDate != null) {
+                                paymentDate = pickedDate;
+                              }
+                            })
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                          onPressed: () async {
+                            final scaffoldMessenger =
+                                ScaffoldMessenger.of(context);
+                            if (!await partnerExists(partnerId)) {
+                              const snackBar = SnackBar(
+                                  content: Text(
+                                      'El socio con el documento ingresado no existe'));
+                              scaffoldMessenger.showSnackBar(snackBar);
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop();
+                            } else {
+                              List<String> months = monthsInput.split(',');
+                              for (var month in months) {
+                                if (await paymentExists(partnerId, month)) {
+                                  continue;
+                                } else {
+                                  paymentId =
+                                      createId(partnerId, month, paymentDate);
+                                  Payment payment = Payment(
+                                      partnerId: partnerId,
+                                      paymentDate: paymentDate,
+                                      subscription: getMonth(month),
+                                      paymentAmount: paymentAmount,
+                                      paymentId: paymentId);
+                                  await _paymentController.addPayment(payment);
+                                }
+                              }
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: const Text('Guardar'))
+                    ]);
+              });
         },
         child: const Icon(Icons.add),
       ),
     );
   }
+}
+
+Future<String> getPartnerName(String partnerId) async {
+  PartnerController partnerController = Get.find<PartnerController>();
+  Partner partner = await partnerController.getPartner(partnerId);
+  return partner.name;
+}
+
+Month getMonth(String month) {
+  switch (month) {
+    case 'Enero':
+      return Month.enero;
+    case 'Febrero':
+      return Month.febrero;
+    case 'Marzo':
+      return Month.marzo;
+    case 'Abril':
+      return Month.abril;
+    case 'Mayo':
+      return Month.mayo;
+    case 'Junio':
+      return Month.junio;
+    case 'Julio':
+      return Month.julio;
+    case 'Agosto':
+      return Month.agosto;
+    case 'Septiembre':
+      return Month.septiembre;
+    case 'Octubre':
+      return Month.octubre;
+    case 'Noviembre':
+      return Month.noviembre;
+    case 'Diciembre':
+      return Month.diciembre;
+    default:
+      return Month.enero;
+  }
+}
+
+String monthToString(Month month) {
+  switch (month) {
+    case Month.enero:
+      return 'Enero';
+    case Month.febrero:
+      return 'Febrero';
+    case Month.marzo:
+      return 'Marzo';
+    case Month.abril:
+      return 'Abril';
+    case Month.mayo:
+      return 'Mayo';
+    case Month.junio:
+      return 'Junio';
+    case Month.julio:
+      return 'Julio';
+    case Month.agosto:
+      return 'Agosto';
+    case Month.septiembre:
+      return 'Septiembre';
+    case Month.octubre:
+      return 'Octubre';
+    case Month.noviembre:
+      return 'Noviembre';
+    case Month.diciembre:
+      return 'Diciembre';
+    default:
+      return 'Enero';
+  }
+}
+
+String createId(String partnerId, String month, DateTime paymentDate) {
+  return '${partnerId}_${paymentDate.year}_$month';
+}
+
+Future<bool> partnerExists(String partnerId) async {
+  PartnerController partnerController = Get.find<PartnerController>();
+  Partner? partner = await partnerController.getPartner(partnerId);
+  return partner != null;
+}
+
+Future<bool> paymentExists(String partnerId, String month) async {
+  PaymentController paymentController = Get.find<PaymentController>();
+  List<Payment>? payments =
+      await paymentController.getPaymentsByPartner(partnerId);
+  if (payments == null) return false;
+  String year = DateTime.now().year.toString();
+  bool exists = payments.any((payment) {
+    String paymentYear = payment.paymentDate.year.toString();
+    String paymentMonth = monthToString(payment.subscription);
+    return paymentYear == year && month == paymentMonth;
+  });
+  return exists;
 }

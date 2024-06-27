@@ -10,7 +10,7 @@ class PaymentUseCase {
     return _paymentRepository.getPayments();
   }
 
-  Future<Payment> getPayment(String id) {
+  Future<Payment?> getPayment(String id) {
     return _paymentRepository.getPayment(id);
   }
 

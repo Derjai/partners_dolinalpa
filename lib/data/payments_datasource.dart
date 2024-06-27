@@ -9,7 +9,7 @@ class FirestorePaymentsRepository implements IPaymentRepository {
   @override
   Future<void> addPayment(Payment payment) async {
     try {
-      await _paymentsCollection.add(payment.toJson());
+      await _paymentsCollection.doc(payment.paymentId).set(payment.toJson());
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw Exception('No tienes permisos para acceder a los datos');
@@ -41,15 +41,11 @@ class FirestorePaymentsRepository implements IPaymentRepository {
   }
 
   @override
-  Future<Payment> getPayment(String id) async {
+  Future<Payment?> getPayment(String id) async {
     try {
       final docSnapshot = await _paymentsCollection.doc(id).get();
-      if (docSnapshot.exists) {
-        return Payment.fromJson(docSnapshot.data() as Map<String, dynamic>)
-            .copyWith(paymentId: docSnapshot.id);
-      } else {
-        throw Exception('Pago no encontrado');
-      }
+      return Payment.fromJson(docSnapshot.data() as Map<String, dynamic>)
+          .copyWith(paymentId: docSnapshot.id);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw Exception('No tienes permisos para acceder a los datos');
@@ -59,7 +55,7 @@ class FirestorePaymentsRepository implements IPaymentRepository {
       }
       throw Exception('Error al obtener pago: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return null;
     }
   }
 
@@ -80,7 +76,7 @@ class FirestorePaymentsRepository implements IPaymentRepository {
       }
       throw Exception('Error al obtener pagos: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return [];
     }
   }
 
@@ -119,7 +115,7 @@ class FirestorePaymentsRepository implements IPaymentRepository {
       }
       throw Exception('Error al obtener pagos: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return [];
     }
   }
 
@@ -142,7 +138,7 @@ class FirestorePaymentsRepository implements IPaymentRepository {
       }
       throw Exception('Error al obtener pagos: ${e.message}');
     } catch (e) {
-      throw Exception('Error desconocido: ${e.toString()}');
+      return [];
     }
   }
 }

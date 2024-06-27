@@ -48,7 +48,8 @@ class Payment {
     return Payment(
       paymentId: json['paymentId'],
       partnerId: json['partnerId'],
-      subscription: json['subscription'],
+      subscription: Month.values.firstWhere(
+          (e) => e.toString().split('.').last == json['subscription']),
       paymentDate: DateTime.parse(json['paymentDate']),
       paymentAmount: json['paymentAmount'],
     );
@@ -58,7 +59,7 @@ class Payment {
     return {
       'paymentId': paymentId,
       'partnerId': partnerId,
-      'subscription': subscription,
+      'subscription': subscription.toString().split('.').last,
       'paymentDate': paymentDate.toIso8601String(),
       'paymentAmount': paymentAmount,
     };

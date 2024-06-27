@@ -11,7 +11,7 @@ class PartnerUseCase {
     return _partnerRepository.getPartners();
   }
 
-  Future<Partner> getPartner(String id) {
+  Future<Partner?> getPartner(String id) {
     return _partnerRepository.getPartner(id);
   }
 
