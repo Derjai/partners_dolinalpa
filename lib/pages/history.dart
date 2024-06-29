@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:partners_dolinalpa/controller/partner_controller.dart';
 import 'package:partners_dolinalpa/controller/payment_controller.dart';
-import 'package:partners_dolinalpa/domain/model/partners.dart';
 import 'package:partners_dolinalpa/domain/model/payments.dart';
 import 'package:intl/intl.dart';
 
@@ -13,6 +12,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  final PartnerController _partnerController = Get.find<PartnerController>();
   final PaymentController _paymentController = Get.find<PaymentController>();
 
   @override
@@ -44,7 +44,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         elevation: 8,
                         child: ListTile(
                           title: FutureBuilder<String>(
-                              future: getPartnerName(payment.partnerId),
+                              future:
+                                  _partnerController.getName(payment.partnerId),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
                                   return Text(snapshot.data!);
@@ -53,7 +54,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 }
                               }),
                           subtitle: Text(
-                              '${DateFormat('dd/MM/yyyy').format(payment.paymentDate)}\n${monthToString(payment.subscription)} - COP \$${payment.paymentAmount}'),
+                              '${DateFormat('dd/MM/yyyy').format(payment.paymentDate)}\n${_paymentController.monthToString(payment.subscription)} - COP \$${payment.paymentAmount}'),
                           isThreeLine: true,
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -66,7 +67,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       builder: (BuildContext context) {
                                         String partnerId = payment.partnerId;
                                         String month =
-                                            monthToString(payment.subscription);
+                                            _paymentController.monthToString(
+                                                payment.subscription);
                                         double paymentAmount =
                                             payment.paymentAmount;
                                         DateTime paymentDate =
@@ -140,8 +142,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                     final scaffoldMessenger =
                                                         ScaffoldMessenger.of(
                                                             context);
-                                                    if (await paymentExists(
-                                                        partnerId, month)) {
+                                                    if (await _paymentController
+                                                            .paymentExists(
+                                                                partnerId,
+                                                                month) &&
+                                                        month !=
+                                                            _paymentController
+                                                                .monthToString(
+                                                                    payment
+                                                                        .subscription)) {
                                                       const snackBar = SnackBar(
                                                           content: Text(
                                                               'El mes ingresado ya fue pago'));
@@ -154,19 +163,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                       Navigator.of(context)
                                                           .pop();
                                                     } else {
-                                                      Payment newPayment =
-                                                          Payment(
-                                                              partnerId:
-                                                                  partnerId,
-                                                              paymentDate:
-                                                                  paymentDate,
-                                                              subscription:
-                                                                  getMonth(
+                                                      Payment newPayment = Payment(
+                                                          partnerId: partnerId,
+                                                          paymentDate:
+                                                              paymentDate,
+                                                          subscription:
+                                                              _paymentController
+                                                                  .getMonth(
                                                                       month),
-                                                              paymentAmount:
-                                                                  paymentAmount,
-                                                              paymentId: payment
-                                                                  .paymentId);
+                                                          paymentAmount:
+                                                              paymentAmount,
+                                                          paymentId: payment
+                                                              .paymentId);
                                                       await _paymentController
                                                           .updatePayment(
                                                               newPayment);
@@ -285,7 +293,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           onPressed: () async {
                             final scaffoldMessenger =
                                 ScaffoldMessenger.of(context);
-                            if (!await partnerExists(partnerId)) {
+                            if (!await _partnerController
+                                .partnerExists(partnerId)) {
                               const snackBar = SnackBar(
                                   content: Text(
                                       'El socio con el documento ingresado no existe'));
@@ -295,15 +304,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             } else {
                               List<String> months = monthsInput.split(',');
                               for (var month in months) {
-                                if (await paymentExists(partnerId, month)) {
+                                if (await _paymentController.paymentExists(
+                                    partnerId, month)) {
                                   continue;
                                 } else {
-                                  paymentId =
-                                      createId(partnerId, month, paymentDate);
+                                  paymentId = _paymentController.createId(
+                                      partnerId, month, paymentDate);
                                   Payment payment = Payment(
                                       partnerId: partnerId,
                                       paymentDate: paymentDate,
-                                      subscription: getMonth(month),
+                                      subscription:
+                                          _paymentController.getMonth(month),
                                       paymentAmount: paymentAmount,
                                       paymentId: paymentId);
                                   await _paymentController.addPayment(payment);
@@ -321,96 +332,4 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
     );
   }
-}
-
-Future<String> getPartnerName(String partnerId) async {
-  PartnerController partnerController = Get.find<PartnerController>();
-  Partner partner = await partnerController.getPartner(partnerId);
-  return partner.name;
-}
-
-Month getMonth(String month) {
-  switch (month) {
-    case 'Enero':
-      return Month.enero;
-    case 'Febrero':
-      return Month.febrero;
-    case 'Marzo':
-      return Month.marzo;
-    case 'Abril':
-      return Month.abril;
-    case 'Mayo':
-      return Month.mayo;
-    case 'Junio':
-      return Month.junio;
-    case 'Julio':
-      return Month.julio;
-    case 'Agosto':
-      return Month.agosto;
-    case 'Septiembre':
-      return Month.septiembre;
-    case 'Octubre':
-      return Month.octubre;
-    case 'Noviembre':
-      return Month.noviembre;
-    case 'Diciembre':
-      return Month.diciembre;
-    default:
-      return Month.enero;
-  }
-}
-
-String monthToString(Month month) {
-  switch (month) {
-    case Month.enero:
-      return 'Enero';
-    case Month.febrero:
-      return 'Febrero';
-    case Month.marzo:
-      return 'Marzo';
-    case Month.abril:
-      return 'Abril';
-    case Month.mayo:
-      return 'Mayo';
-    case Month.junio:
-      return 'Junio';
-    case Month.julio:
-      return 'Julio';
-    case Month.agosto:
-      return 'Agosto';
-    case Month.septiembre:
-      return 'Septiembre';
-    case Month.octubre:
-      return 'Octubre';
-    case Month.noviembre:
-      return 'Noviembre';
-    case Month.diciembre:
-      return 'Diciembre';
-    default:
-      return 'Enero';
-  }
-}
-
-String createId(String partnerId, String month, DateTime paymentDate) {
-  return '${partnerId}_${paymentDate.year}_$month';
-}
-
-Future<bool> partnerExists(String partnerId) async {
-  PartnerController partnerController = Get.find<PartnerController>();
-  Partner? partner = await partnerController.getPartner(partnerId);
-  return partner != null;
-}
-
-Future<bool> paymentExists(String partnerId, String month) async {
-  PaymentController paymentController = Get.find<PaymentController>();
-  List<Payment>? payments =
-      await paymentController.getPaymentsByPartner(partnerId);
-  if (payments == null) return false;
-  String year = DateTime.now().year.toString();
-  bool exists = payments.any((payment) {
-    String paymentYear = payment.paymentDate.year.toString();
-    String paymentMonth = monthToString(payment.subscription);
-    return paymentYear == year && month == paymentMonth;
-  });
-  return exists;
 }
