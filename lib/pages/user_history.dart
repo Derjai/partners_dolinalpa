@@ -31,10 +31,21 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     });
   }
 
+  void reloadView() {
+    _initPayments();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: reloadView,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

@@ -42,11 +42,26 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void reloadView() {
+    setState(() {
+      payments = _paymentController.payments;
+      partners = _partnerController.partners;
+      orderByDate(payments!);
+      filtered = partners!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Resumen'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: reloadView,
+            ),
+          ],
         ),
         drawer: Drawer(
             child: ListView(
