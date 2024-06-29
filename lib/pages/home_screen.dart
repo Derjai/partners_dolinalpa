@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.home),
               title: const Text('Inicio'),
               onTap: () {
-                Navigator.pushNamed(context, '/');
+                Navigator.pushNamed(context, '/home');
               },
             ),
             ListTile(
@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.attach_money),
               title: const Text('Pagos'),
               onTap: () {
-                Navigator.pushNamed(context, '/payments');
+                Navigator.pushNamed(context, '/history');
               },
             ),
           ],
