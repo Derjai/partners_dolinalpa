@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:partners_dolinalpa/controller/partner_controller.dart';
+import 'package:partners_dolinalpa/controller/payment_controller.dart';
+import 'package:partners_dolinalpa/domain/model/partners.dart';
+import 'package:partners_dolinalpa/domain/model/payments.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,41 +15,33 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isExpandedP = true;
   bool _isExpandedS = true;
-  final List<Map<String, dynamic>> payments = [
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de junio 2024',
-      'mensualidad': 'Mayo',
-      'monto': '100000',
-    },
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de mayo 2024',
-      'mensualidad': 'Abril',
-      'monto': '100000',
-    },
-    {
-      'nombre': 'Martha Morales',
-      'fecha': '24 de mayo 2024',
-      'mensualidad': 'Marzo',
-      'monto': '300000',
-    },
-  ];
+  List<Partner> filtered = [];
+  final PaymentController _paymentController = Get.find<PaymentController>();
+  final PartnerController _partnerController = Get.find<PartnerController>();
+  List<Payment>? payments;
+  List<Partner>? partners;
 
-  final List<Map<String, dynamic>> users = [
-    {
-      'nombre': 'Martha Morales',
-      'estado': 'Activo',
-    },
-    {
-      'nombre': 'Juan Pérez',
-      'estado': 'Inactivo',
-    },
-    {
-      'nombre': 'Luisa Fernanda',
-      'estado': 'Riesgo',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    payments = _paymentController.payments;
+    partners = _partnerController.partners;
+    orderByDate(payments!);
+    filtered = partners!;
+  }
+
+  void orderByDate(List<Payment> payments) {
+    payments.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+  }
+
+  void filterPartners(String value) {
+    setState(() {
+      filtered = partners!.where((partner) {
+        return partner.name.toLowerCase().contains(value.toLowerCase());
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,9 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
-                              children: List.generate(
-                                  3,
-                                  (index) => Card(
+                              children: payments!
+                                  .take(3)
+                                  .map((payment) => Card(
                                         child: Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Row(
@@ -147,25 +145,37 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         CrossAxisAlignment
                                                             .start,
                                                     children: [
+                                                      FutureBuilder<String>(
+                                                          future: _partnerController
+                                                              .getName(payment
+                                                                  .partnerId),
+                                                          builder: (context,
+                                                              snapshot) {
+                                                            if (snapshot
+                                                                .hasData) {
+                                                              return Text(
+                                                                snapshot.data!,
+                                                                style: Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .displaySmall,
+                                                              );
+                                                            } else {
+                                                              return const Text(
+                                                                  'Cargando...');
+                                                            }
+                                                          }),
                                                       Text(
-                                                        payments[index]
-                                                            ['nombre'],
-                                                        style: const TextStyle(
-                                                            fontSize: 18,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
+                                                          'Mensualidad: ${_paymentController.monthToString(payment.subscription)}'),
                                                       Text(
-                                                          'Mensualidad: ${payments[index]['mensualidad']}'),
-                                                      Text(
-                                                          'Fecha de pago: ${payments[index]['fecha']}'),
+                                                          'Fecha de pago: ${DateFormat('dd/MM/yyyy').format(payment.paymentDate)}'),
                                                     ],
                                                   ),
                                                 )
                                               ],
                                             )),
-                                      ))))
+                                      ))
+                                  .toList()))
                   ],
                 ),
               ),
@@ -207,37 +217,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                   labelText: 'Buscar Socio',
                                   border: OutlineInputBorder(),
                                   suffixIcon: Icon(Icons.search)),
-                              onChanged: (value) {},
+                              onChanged: filterPartners,
                             ),
-                            ...List.generate(
-                                3,
-                                (index) => Card(
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      users[index]['nombre'],
-                                                      style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                    Text(
-                                                        'Estado: ${users[index]['estado']}'),
-                                                  ],
+                            ...filtered.map((partner) => Card(
+                                  child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  partner.name,
+                                                  style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
-                                              )
-                                            ],
-                                          )),
-                                    ))
+                                                Text(
+                                                    'Estado: ${_partnerController.parterStatusToString(partner.status)}'),
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      )),
+                                ))
                           ]))
                   ],
                 ),
