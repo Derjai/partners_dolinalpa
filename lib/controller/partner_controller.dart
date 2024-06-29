@@ -37,4 +37,14 @@ class PartnerController extends GetxController {
     partners.removeWhere((partner) => partner.id == id);
     getPartners();
   }
+
+  Future<String> getName(String id) async {
+    Partner partner = await getPartner(id);
+    return partner.name;
+  }
+
+  Future<bool> partnerExists(String id) async {
+    Partner? partner = await getPartner(id);
+    return partner != null;
+  }
 }

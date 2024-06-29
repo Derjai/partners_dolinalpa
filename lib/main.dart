@@ -75,11 +75,18 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       initialRoute: '/',
+      onGenerateRoute: (settings) {
+        if (settings.name == '/payments') {
+          final idSocio = settings.arguments as String;
+          return MaterialPageRoute(
+              builder: (context) => PaymentsScreen(idSocio: idSocio));
+        }
+        return null;
+      },
       routes: {
         '/': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/partners': (context) => const UserScreen(),
-        '/payments': (context) => const PaymentsScreen(),
         '/history': (context) => const HistoryScreen(),
         '/calendar': (context) => const CalendarScreen(),
       },
