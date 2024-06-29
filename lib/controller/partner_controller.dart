@@ -47,4 +47,17 @@ class PartnerController extends GetxController {
     Partner? partner = await getPartner(id);
     return partner != null;
   }
+
+  String parterStatusToString(PartnerStatus status) {
+    switch (status) {
+      case PartnerStatus.activo:
+        return 'Activo';
+      case PartnerStatus.inactivo:
+        return 'Inactivo';
+      case PartnerStatus.riesgo:
+        return 'Riesgo';
+      default:
+        return 'Activo';
+    }
+  }
 }

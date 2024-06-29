@@ -43,8 +43,8 @@ class _UserScreenState extends State<UserScreen> {
                       child: ListTile(
                         title: Text(user.name,
                             style: TextStyle(
-                                color: getColorEstado(
-                                    parterStatusToString(user.status)),
+                                color: getColorEstado(_partnerController
+                                    .parterStatusToString(user.status)),
                                 fontWeight: FontWeight.bold)),
                         subtitle: Text('Documento: ${user.id}'),
                         trailing: Row(
@@ -138,11 +138,13 @@ class _UserScreenState extends State<UserScreen> {
                               width: 80,
                               padding: const EdgeInsets.all(4.0),
                               decoration: BoxDecoration(
-                                color: getColorEstado(
-                                    parterStatusToString(user.status)),
+                                color: getColorEstado(_partnerController
+                                    .parterStatusToString(user.status)),
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
-                              child: Text(parterStatusToString(user.status),
+                              child: Text(
+                                  _partnerController
+                                      .parterStatusToString(user.status),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -233,18 +235,5 @@ PartnerStatus getPartnerStatus(String status) {
       return PartnerStatus.riesgo;
     default:
       return PartnerStatus.activo;
-  }
-}
-
-String parterStatusToString(PartnerStatus status) {
-  switch (status) {
-    case PartnerStatus.activo:
-      return 'Activo';
-    case PartnerStatus.inactivo:
-      return 'Inactivo';
-    case PartnerStatus.riesgo:
-      return 'Riesgo';
-    default:
-      return 'Activo';
   }
 }
