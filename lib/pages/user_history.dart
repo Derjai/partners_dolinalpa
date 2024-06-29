@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:partners_dolinalpa/controller/partner_controller.dart';
 import 'package:partners_dolinalpa/controller/payment_controller.dart';
@@ -12,8 +13,8 @@ class PaymentsScreen extends StatefulWidget {
 }
 
 class _PaymentsScreenState extends State<PaymentsScreen> {
-  final PartnerController _partnerController = PartnerController();
-  final PaymentController _paymentController = PaymentController();
+  final PartnerController _partnerController = Get.find<PartnerController>();
+  final PaymentController _paymentController = Get.find<PaymentController>();
   List<Payment>? payments;
 
   @override
@@ -72,12 +73,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.calendar_month),
-                                  onPressed: () {
-                                    // TODO: Implementar la funcionalidad de ver detalle
-                                  },
-                                ),
                                 IconButton(
                                   icon: const Icon(Icons.edit),
                                   onPressed: () {
