@@ -24,8 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    payments = _paymentController.payments;
-    partners = _partnerController.partners;
+    updatePartner();
     orderByDate(payments!);
     filtered = partners!;
   }
@@ -42,10 +41,36 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void updatePartner() async {
+    List<Payment> filtered = [];
+    payments = _paymentController.payments;
+    partners = _partnerController.partners;
+    PartnerStatus status = PartnerStatus.activo;
+    for (var partner in partners!) {
+      filtered = payments!
+          .where((payment) => payment.partnerId == partner.id)
+          .toList();
+      if (filtered.isEmpty) {
+        return;
+      }
+      Payment lastPayment = filtered.first;
+      int monthsDifferente = DateTime.now().month -
+          lastPayment.paymentDate.month +
+          12 * (DateTime.now().year - lastPayment.paymentDate.year);
+      if (monthsDifferente <= 1) {
+        status = PartnerStatus.activo;
+      } else if (monthsDifferente >= 3) {
+        status = PartnerStatus.inactivo;
+      } else {
+        status = PartnerStatus.riesgo;
+      }
+      await _partnerController.updatePartner(partner.copyWith(status: status));
+    }
+  }
+
   void reloadView() {
     setState(() {
-      payments = _paymentController.payments;
-      partners = _partnerController.partners;
+      updatePartner();
       orderByDate(payments!);
       filtered = partners!;
     });
