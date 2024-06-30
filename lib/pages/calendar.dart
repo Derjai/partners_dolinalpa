@@ -36,6 +36,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  void reloadView() {
+    _initPayments();
+  }
+
   Map<DateTime, List<Payment>> _mapPaymentsToEvents(List<Payment>? payments) {
     Map<DateTime, List<Payment>> eventsMap = {};
     if (payments != null) {
@@ -70,6 +74,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendario'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: reloadView,
+          ),
+        ],
       ),
       body: Column(
         children: [
