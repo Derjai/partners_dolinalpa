@@ -51,7 +51,7 @@ class Payment {
       subscription: Month.values.firstWhere(
           (e) => e.toString().split('.').last == json['subscription']),
       paymentDate: DateTime.parse(json['paymentDate']),
-      paymentAmount: json['paymentAmount'],
+      paymentAmount: json['paymentAmount'].toDouble(),
     );
   }
 

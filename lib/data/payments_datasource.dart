@@ -63,10 +63,11 @@ class FirestorePaymentsRepository implements IPaymentRepository {
   Future<List<Payment>> getPayments() async {
     try {
       final querySnapshot = await _paymentsCollection.get();
-      return querySnapshot.docs
+      final paymentsList = querySnapshot.docs
           .map((doc) => Payment.fromJson(doc.data() as Map<String, dynamic>)
               .copyWith(paymentId: doc.id))
           .toList();
+      return paymentsList;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw Exception('No tienes permisos para acceder a los datos');
